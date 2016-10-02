@@ -1,0 +1,375 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>堆排序 | Yong Jung House</title>
+  <meta name="author" content="lucklyxhj">
+  
+  <meta name="description" content="个人博客，热爱生活，IT。这里有简单算法，编程技巧，HTML，CSS">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="堆排序"/>
+  <meta property="og:site_name" content="Yong Jung House"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Yong Jung House" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script type="text/javascript" src="/js/calendar.js"></script>
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Yong Jung House</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/Recently">Recently</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div></header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-12-06T14:12:12.000Z"><a href="/堆排序/">Dec 6 2014</a></time>
+      
+      
+  
+    <h1 class="title">堆排序</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>#完全二叉树<br>说到堆就不得不先对二叉树有个了解，因为二叉堆是完全二叉树或者近似完全二叉树<a id="more"></a>（堆可以选择从左或者从右，但完全二叉树是从左排序的）。二叉树是最多有两个子节点的树。完全二叉树除最后一层外，每一层上的节点数均达到最大值，最后一层只缺少右边若干叶子节点。完全二叉树节点i(从0开始排序)的父节点可表示为<strong>(i-1)/2</strong>, 严蔚敏的<em>数据结构</em>书中有严格证明。</p>
+<p>#二叉堆<br>二叉堆的特点是：<br>a. 父节点的值总是大于或等于任何一个子节点的值。<br>b. 每个节点的左子树和右子树都是一个二叉堆。<br>二叉堆分为最大堆和最小堆。</p>
+<p>#堆的操作：插入与删除</p>
+<ul>
+<li>插入。堆的插入总是将要插入的元素放到数组的最后，然后再与它的父节点比较，如果比父节点小则交换二者，否则说明已经找到自己的位置，不断向上递归的方式最终以lgn的效率完成插入操作。</li>
+</ul>
+<pre><code>void MinHeapInsert(int *a, int n, int elem){//n为原来的数组大小
+    int i, j;
+    i = n;
+    j = (i - 1) / 2;
+    while (j &gt;= 0 &amp;&amp; i != 0){
+        if (a[j] &lt; elem)
+            break;
+        a[i] = a[j];
+        i = j;
+        j = (i - 1) / 2;
+    }
+    a[i] = elem;
+}
+</code></pre><ul>
+<li>删除。删除的过程需要先理清思路，即将i节点删除，然后把最后一个数放到i节点，再与两个孩子节点比较，将较小的孩子节点与父节点交换，递归计算，从而重新构成最小堆。可以发现该操作实质是把i节点融入到下方已经堆化的序列中的过程，因为其不符合堆要求的节点只有i节点，故操作简单。</li>
+</ul>
+<pre><code>void MinHeapDel(int *a, int i, int n){//n为删除后的数组长度，便于后续使用
+    int temp, j;
+    temp = a[n];
+    j = i * 2 + 1;
+    while (j &lt; n){
+        if (j + 1 &lt; n &amp;&amp; a[j + 1] &lt; a[j])
+            j++;
+        if (temp &lt; a[j])
+            break;
+        a[i] = a[j];
+        i = j;
+        j = i * 2 + 1;
+    }
+    a[i] = temp;
+}
+</code></pre><p>#堆排序<br>堆排序分为两步，<strong>堆化数组</strong>，<strong>排序</strong>。<br>利用递归的思想，很容易想到，每一个叶子节点是符合要求的堆，于是只需要将父节点融合到下方的最小堆中，递归，堆化数组不断变大。堆化过程只是每次调整相对的根节点的位置，于是上述堆删除中的调整过程就可以为我们所用了。</p>
+<pre><code>void MakeMinHeap(int *a, int n){//堆化数组
+    for (int i = (n -1) / 2; i &gt;= 0; i--)
+        MinHeapDel(a, i, n);
+}
+</code></pre><p>观察最小堆，不难发现其根节点的值是数组中最小的，那么利用删除节点的原理，将其与最后一个元素交换，从而提取出整个数组的最小值，对剩下的n-1个元素堆化，重新得到一个n-1个元素的最小堆，递归取出根节点的值，从而最终获得一个从大到小的有序数列，即排序完成。</p>
+<pre><code>void MinHeapSort(int *a, int n){//排序
+    int temp;
+    MakeMinHeap(a, n);
+    for (int i = n - 1; i &gt; 0; i++){
+        int temp = a[0];
+        a[0] = a[i];
+        a[i] = temp;
+        MinHeapDel(a, 0, i);
+    }
+}
+</code></pre>
+      
+    </div>
+    <footer>
+      
+        
+        
+  
+  <div class="tags">
+    <a href="/tags/算法/">算法</a>, <a href="/tags/堆排序/">堆排序</a>
+  </div>
+
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-title="堆排序" data-url="http://yoursite.com/堆排序/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xhjblog"};
+(function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = 'http://static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- Duoshuo Comment END -->
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Suche">
+    <input type="hidden" name="q" value="site:yoursite.com">
+  </form>
+</div>
+
+  
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag-Cloud</h3>
+  <div class="entry">
+    <a href="/tags/IE/" style="font-size: 10px;">IE</a> <a href="/tags/bug/" style="font-size: 10px;">bug</a> <a href="/tags/excel/" style="font-size: 10px;">excel</a> <a href="/tags/float/" style="font-size: 10px;">float</a> <a href="/tags/inline/" style="font-size: 10px;">inline</a> <a href="/tags/javascript/" style="font-size: 10px;">javascript</a> <a href="/tags/note/" style="font-size: 10px;">note</a> <a href="/tags/skills/" style="font-size: 10px;">skills</a> <a href="/tags/sublime/" style="font-size: 10px;">sublime</a> <a href="/tags/vba/" style="font-size: 10px;">vba</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/word/" style="font-size: 10px;">word</a> <a href="/tags/冒泡排序/" style="font-size: 10px;">冒泡排序</a> <a href="/tags/分析/" style="font-size: 10px;">分析</a> <a href="/tags/堆排序/" style="font-size: 10px;">堆排序</a> <a href="/tags/备忘/" style="font-size: 10px;">备忘</a> <a href="/tags/学习/" style="font-size: 10px;">学习</a> <a href="/tags/希尔排序/" style="font-size: 10px;">希尔排序</a> <a href="/tags/归并排序/" style="font-size: 10px;">归并排序</a> <a href="/tags/快捷键/" style="font-size: 10px;">快捷键</a> <a href="/tags/快速排序/" style="font-size: 10px;">快速排序</a> <a href="/tags/排序/" style="font-size: 15px;">排序</a> <a href="/tags/插入排序/" style="font-size: 10px;">插入排序</a> <a href="/tags/月亮与六便士/" style="font-size: 10px;">月亮与六便士</a> <a href="/tags/框架/" style="font-size: 10px;">框架</a> <a href="/tags/环境搭建/" style="font-size: 10px;">环境搭建</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/算法/" style="font-size: 20px;">算法</a> <a href="/tags/读书笔记/" style="font-size: 10px;">读书笔记</a> <a href="/tags/选择排序/" style="font-size: 15px;">选择排序</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+  </div>
+</div>
+
+
+  <div class="widget tag">
+    <h3 class="title">Calendar</h3>
+    <div class="Calendar">
+      <div id="idCalendarPre">&lt;&lt;</div>
+      <div id="idCalendarNext">&gt;&gt;</div>
+      <span id="idCalendarYear">2008</span>年<span id="idCalendarMonth">8</span>月
+      <table cellspacing="0">
+        <thead>
+          <tr>
+            <td>日</td>
+            <td>一</td>
+            <td>二</td>
+            <td>三</td>
+            <td>四</td>
+            <td>五</td>
+            <td>六</td>
+          </tr>
+        </thead>
+        <tbody id="idCalendar">
+        </tbody>
+      </table>
+    </div>
+</div>
+
+<script>
+var cale = new Calendar("idCalendar", {
+    //howiefh
+    /* SelectDay: new Date().setDate(10), */
+    SelectDay: new Date().setDate(this.Date),
+    onSelectDay: function(o){ o.className = "onSelect"; },
+    //howiefh
+    onToday: function(o){ o.className = "onToday"; },
+    onFinish: function(){
+        // debugger;
+        //howiefh
+        // $("idCalendarYear").innerHTML = this.Year; $("idCalendarMonth").innerHTML = this.Month;
+        $$("idCalendarYear").innerHTML = "<a href='/" + "archives/" + this.Year + "/'>" + this.Year + " "+ "</a>";
+        if (this.Month < 10) {
+            // debugger;
+            $$("idCalendarMonth").innerHTML = "<a href='/" + "archives/" + this.Year + "/" + "0" + this.Month + "/'>" + " " + this.Month + " " + "</a>";
+        } else {
+            // debugger;
+            $$("idCalendarMonth").innerHTML = "<a href='/" + "archives/" + this.Year + "/" + this.Month + "/'>" + " " + this.Month + " " + "</a>";
+        }
+
+        // var flag = [10,15,20];
+        // for(var i = 0, len = flag.length; i < len; i++){
+            // this.Days[flag[i]].innerHTML = "<a href='javascript:void(0);' onclick=\"alert('日期是:"+this.Year+"/"+this.Month+"/"+flag[i]+"');return false;\">" + flag[i] + "</a>";
+        // }
+
+        
+            var postdate = new Date("Mon Jun 02 2014 22:06:33 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/5 days learn a web frameworks/' title='5天学会一种web框架'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Fri Oct 31 2014 11:31:15 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/SelectSort/' title='选择排序'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Sat Dec 06 2014 16:14:14 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/VBA Skills/' title='WordExcel VBA Skills'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Thu Dec 04 2014 09:02:14 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/Sublime Note/' title='sublime text2 Note'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Wed Jun 04 2014 22:05:00 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/javascript笔记备忘/' title='javascript笔记备忘'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Fri Oct 17 2014 22:03:15 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/frontend/' title='前端笔记'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Sat Dec 06 2014 22:12:12 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/堆排序/' title='堆排序'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Sat Oct 25 2014 09:26:15 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/冒泡排序简记/' title='冒泡排序简记'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Fri Nov 07 2014 21:53:15 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/希尔排序/' title='希尔排序'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Sun Nov 16 2014 19:22:13 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/归并排序/' title='归并排序'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Tue Nov 25 2014 23:20:20 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/快速排序/' title='快速排序'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Thu Oct 23 2014 21:20:18 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/插入排序的学习/' title='插入排序的算法'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Sat Dec 27 2014 20:20:20 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/杂散之三/' title='杂散之三'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Fri Oct 31 2014 19:02:13 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/月亮与六便士part1/' title='月亮与六便士读书笔记-part1'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Mon Nov 10 2014 20:25:15 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/选择排序分析/' title='选择排序算法分析'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Wed Oct 29 2014 21:34:15 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/算法题/' title='一个算法题'>" + day + "</a>";
+            }
+    
+            var postdate = new Date("Tue Dec 02 2014 18:54:44 GMT+0800");
+            if (postdate.getFullYear() == this.Year && postdate.getMonth()+1 == this.Month) {
+                var day = postdate.getDate();
+                this.Days[day].innerHTML = "<a href='/配置相关记录/' title='记录&amp;记忆'>" + day + "</a>";
+            }
+    
+
+        //howiefh
+    }
+});
+
+$$("idCalendarPre").onclick = function(){ cale.PreMonth(); }
+$$("idCalendarNext").onclick = function(){ cale.NextMonth(); }
+</script>
+
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2016 lucklyxhj
+  
+</div>
+<div class="clearfix"></div>
+</footer>
+  <script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/moment.min.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<div style="display:none;">
+	<script type="text/javascript">
+	var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+	document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F26614183fc5ba2f5360cf46fd9cb1b96' type='text/javascript'%3E%3C/script%3E"));
+	</script>
+
+
+</div>
+
+
+</body>
+</html>
